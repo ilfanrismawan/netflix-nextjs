@@ -1,20 +1,25 @@
-import Head from 'next/head'
-import Header from '../components/Header'
-import Banner from '../components/Banner'
-import requests from '../utils/requests'
-import { Movie } from '../typings'
-import Row from '../components/Row'
-import { listenerCount } from 'process'
+import Head from "next/head";
+import Header from "../components/Header";
+import Banner from "../components/Banner";
+import requests from "../utils/requests";
+import { Movie } from "../typings";
+import Row from "../components/Row";
+import { listenerCount } from "process";
+import useAuth from "../hooks/useAuth";
+import { useRecoilValue } from "recoil";
+import { useState } from "react";
+import { modalState } from "../atoms/modalAtom.";
+import Modal from "../components/Modal";
 
 interface Props {
-  netflixOriginals: Movie[]
-  trendingNow: Movie[]
-  topRated: Movie[]
-  actionMovies: Movie[]
-  comedyMovies: Movie[]
-  horrorMovies: Movie[]
-  romanceMovies: Movie[]
-  documentaries: Movie[]
+  netflixOriginals: Movie[];
+  trendingNow: Movie[];
+  topRated: Movie[];
+  actionMovies: Movie[];
+  comedyMovies: Movie[];
+  horrorMovies: Movie[];
+  romanceMovies: Movie[];
+  documentaries: Movie[];
 }
 
 const Home = ({
@@ -27,9 +32,16 @@ const Home = ({
   topRated,
   trendingNow,
 }: Props) => {
-  console.log(netflixOriginals);
+  const { loading } = useAuth();
+  const showModal = useRecoilValue(modalState);
+
+  if (loading) return null;
   return (
-    <div className="relative h-screen bg-gradient-to-b lg:h-[140vh]">
+    <div
+      className={`relative h-screen bg-gradient-to-b from-gray-900/10 to-[#010511] lg:h-[140vh] ${
+        showModal && "!h-screen overflow-hidden"
+      }`}
+    >
       <Head>
         <title>Home - Netflix</title>
         <link rel="icon" href="/favicon.ico" />
@@ -48,16 +60,14 @@ const Home = ({
           <Row title="Horror" movies={horrorMovies} />
           <Row title="Romance" movies={romanceMovies} />
           <Row title="Documentaries" movies={documentaries} />
-
-
         </section>
       </main>
-      {/* Modal */}
+      {showModal && <Modal />}
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
 export const getServerSideProps = async () => {
   const [
     netflixOriginals,
@@ -77,7 +87,7 @@ export const getServerSideProps = async () => {
     fetch(requests.fetchHorrorMovies).then((res) => res.json()),
     fetch(requests.fetchRomanceMovies).then((res) => res.json()),
     fetch(requests.fetchDocumentaries).then((res) => res.json()),
-  ])
+  ]);
 
   return {
     props: {
@@ -90,5 +100,5 @@ export const getServerSideProps = async () => {
       romanceMovies: romanceMovies.results,
       documentaries: documentaries.results,
     },
-  }
-}
+  };
+};
